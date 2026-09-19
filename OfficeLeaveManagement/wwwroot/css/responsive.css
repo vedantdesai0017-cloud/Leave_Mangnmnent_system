@@ -1,0 +1,49 @@
+@media (max-width: 991.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+  }
+  .sidebar.show {
+    transform: translateX(0);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1035;
+  }
+  .sidebar-overlay.show {
+    display: block;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .stat-card .stat-value {
+    font-size: 1.5rem;
+  }
+  .topbar {
+    padding: 0 0.75rem;
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .custom-table {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .login-card {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  .stat-card {
+    padding: 1rem;
+  }
+}

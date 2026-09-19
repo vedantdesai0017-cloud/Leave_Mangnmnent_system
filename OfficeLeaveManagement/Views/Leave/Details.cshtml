@@ -1,0 +1,150 @@
+@model OfficeLeaveManagement.ViewModels.LeaveDetailsViewModel
+@using OfficeLeaveManagement.Models
+@{
+    ViewData["Title"] = "Leave Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Leave Application Details</h2>
+    <a asp-action="MyLeaves" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to My Leaves
+    </a>
+</div>
+
+<div class="row">
+    <!-- Left Column: Details -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title text-primary border-bottom pb-2 mb-3">Employee Information</h5>
+                <div class="row mb-4">
+                    <div class="col-sm-4 fw-bold">Name:</div>
+                    <div class="col-sm-8">@Model.EmployeeName</div>
+                    
+                    <div class="col-sm-4 fw-bold mt-2">Code:</div>
+                    <div class="col-sm-8 mt-2">@Model.EmployeeCode</div>
+                    
+                    <div class="col-sm-4 fw-bold mt-2">Department:</div>
+                    <div class="col-sm-8 mt-2">@Model.DepartmentName</div>
+                </div>
+
+                <h5 class="card-title text-primary border-bottom pb-2 mb-3">Leave Information</h5>
+                <div class="row mb-4">
+                    <div class="col-sm-4 fw-bold">Leave Type:</div>
+                    <div class="col-sm-8">@Model.LeaveTypeName</div>
+                    
+                    <div class="col-sm-4 fw-bold mt-2">Duration:</div>
+                    <div class="col-sm-8 mt-2">@Model.Application.StartDate.ToString("dd MMM yyyy") to @Model.Application.EndDate.ToString("dd MMM yyyy")</div>
+                    
+                    <div class="col-sm-4 fw-bold mt-2">Number of Days:</div>
+                    <div class="col-sm-8 mt-2">@Model.Application.NumberOfDays</div>
+                    
+                    <div class="col-sm-4 fw-bold mt-2">Reason:</div>
+                    <div class="col-sm-8 mt-2">@Model.Application.Reason</div>
+                </div>
+
+                <h5 class="card-title text-primary border-bottom pb-2 mb-3">Status Information</h5>
+                <div class="row">
+                    <div class="col-sm-4 fw-bold">Status:</div>
+                    <div class="col-sm-8">
+                        @{
+                            var badgeClass = Model.Application.Status switch
+                            {
+                                LeaveStatus.Pending => "badge-pending bg-warning text-dark",
+                                LeaveStatus.Approved => "badge-approved bg-success",
+                                LeaveStatus.Rejected => "badge-rejected bg-danger",
+                                LeaveStatus.Cancelled => "badge-cancelled bg-secondary",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @badgeClass">@Model.Application.Status</span>
+                    </div>
+                    
+                    <div class="col-sm-4 fw-bold mt-2">Applied Date:</div>
+                    <div class="col-sm-8 mt-2">@Model.Application.AppliedDate.ToString("dd MMM yyyy")</div>
+                    
+                    @if (Model.Application.ReviewedDate.HasValue)
+                    {
+                        <div class="col-sm-4 fw-bold mt-2">Reviewed Date:</div>
+                        <div class="col-sm-8 mt-2">@Model.Application.ReviewedDate.Value.ToString("dd MMM yyyy")</div>
+                        
+                        <div class="col-sm-4 fw-bold mt-2">Reviewed By:</div>
+                        <div class="col-sm-8 mt-2">@Model.Application.ReviewedBy</div>
+                        
+                        <div class="col-sm-4 fw-bold mt-2">Manager Comment:</div>
+                        <div class="col-sm-8 mt-2">@Model.Application.ManagerComment</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Summary & Actions -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-primary border-bottom pb-2 mb-3">Summary</h5>
+                
+                <div class="mb-4">
+                    <p class="mb-1 text-muted">@Model.LeaveTypeName Remaining</p>
+                    <h3 class="text-info">@Model.LeaveBalanceRemaining days</h3>
+                </div>
+
+                <div class="mb-4">
+                    <p class="mb-1 text-muted">Current Status</p>
+                    <span class="badge @badgeClass fs-6 p-2 w-100">@Model.Application.Status</span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    @if (Model.CanCancel)
+                    {
+                        <form asp-action="Cancel" asp-controller="Leave" asp-route-id="@Model.Application.LeaveApplicationId" method="post" onsubmit="return confirm('Are you sure you want to cancel this leave application?');">
+                            <button type="submit" class="btn btn-outline-danger w-100">Cancel Application</button>
+                        </form>
+                    }
+
+                    @if (Model.CanApproveReject)
+                    {
+                        <form asp-action="Approve" asp-controller="Manager" asp-route-id="@Model.Application.LeaveApplicationId" asp-route-applicationId="@Model.Application.LeaveApplicationId" method="post">
+                            <input type="hidden" name="applicationId" value="@Model.Application.LeaveApplicationId" />
+                            <button type="submit" class="btn btn-success w-100 mb-2">Approve Leave</button>
+                        </form>
+                        
+                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            Reject Leave
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+@if (Model.CanApproveReject)
+{
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">Reject Leave Application</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="Reject" asp-controller="Manager" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="@Model.Application.LeaveApplicationId" />
+                        <input type="hidden" name="applicationId" value="@Model.Application.LeaveApplicationId" />
+                        <div class="mb-3">
+                            <label for="managerComment" class="form-label">Rejection Reason / Manager Comment <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="managerComment" name="managerComment" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Reject Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

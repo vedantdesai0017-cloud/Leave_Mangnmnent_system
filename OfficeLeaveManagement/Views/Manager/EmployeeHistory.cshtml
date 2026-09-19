@@ -1,0 +1,158 @@
+@model List<OfficeLeaveManagement.Models.Employee>
+@using OfficeLeaveManagement.Models
+
+<div class="container-fluid py-4">
+    <h2 class="mb-4">Employee Leave History</h2>
+
+    @{
+        var historyData = ViewBag.HistoryData as dynamic;
+    }
+
+    <div class="accordion" id="employeeHistoryAccordion">
+        @if (historyData != null)
+        {
+            int index = 0;
+            foreach (var item in historyData)
+            {
+                var employee = item.Employee as Employee;
+                if (employee == null) continue;
+                var leaves = (item.Leaves as List<LeaveApplication>) ?? new List<LeaveApplication>();
+                var balances = (item.Balances as List<LeaveBalance>) ?? new List<LeaveBalance>();
+                string headingId = $"heading{index}";
+                string collapseId = $"collapse{index}";
+                
+                <div class="accordion-item mb-3 border-0 shadow-sm rounded">
+                    <h2 class="accordion-header" id="@headingId">
+                        <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                            <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                                <div>
+                                    <span class="fw-bold">@employee.FullName</span>
+                                    <span class="text-muted ms-2">(@employee.EmployeeCode)</span>
+                                </div>
+                                <span class="badge bg-primary">@employee.DepartmentName</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#employeeHistoryAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="row">
+                                <!-- Leave Balances -->
+                                <div class="col-md-5 mb-4 mb-md-0">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-header bg-white">
+                                            <h6 class="mb-0">Leave Balances</h6>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <table class="table table-sm mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        <th>Total</th>
+                                                        <th>Used</th>
+                                                        <th>Remaining</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (balances != null && balances.Any())
+                                                    {
+                                                        foreach (var bal in balances)
+                                                        {
+                                                            <tr>
+                                                                <td>@bal.LeaveTypeName</td>
+                                                                <td>@bal.TotalLeaves</td>
+                                                                <td>@bal.UsedLeaves</td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <span class="me-2">@bal.RemainingLeaves</span>
+                                                                        @{
+                                                                            var percent = bal.TotalLeaves > 0 ? (bal.UsedLeaves * 100 / bal.TotalLeaves) : 0;
+                                                                            var barClass = percent > 80 ? "bg-danger" : (percent > 50 ? "bg-warning" : "bg-success");
+                                                                        }
+                                                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                                                            <div class="progress-bar @barClass" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <tr><td colspan="4" class="text-center text-muted">No balance data</td></tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Leave History -->
+                                <div class="col-md-7">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-header bg-white">
+                                            <h6 class="mb-0">Recent Leave History</h6>
+                                        </div>
+                                        <div class="card-body p-0 table-responsive">
+                                            <table class="table table-sm table-hover mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        <th>Start</th>
+                                                        <th>End</th>
+                                                        <th>Days</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (leaves != null && leaves.Any())
+                                                    {
+                                                        foreach (var leave in leaves.OrderByDescending(l => l.AppliedDate).Take(5))
+                                                        {
+                                                            <tr>
+                                                                <td>@leave.LeaveTypeName</td>
+                                                                <td>@leave.StartDate.ToString("dd MMM yyyy")</td>
+                                                                <td>@leave.EndDate.ToString("dd MMM yyyy")</td>
+                                                                <td>@leave.NumberOfDays</td>
+                                                                <td>
+                                                                    @if (leave.Status == LeaveStatus.Pending)
+                                                                    {
+                                                                        <span class="badge bg-warning text-dark">Pending</span>
+                                                                    }
+                                                                    else if (leave.Status == LeaveStatus.Approved)
+                                                                    {
+                                                                        <span class="badge bg-success">Approved</span>
+                                                                    }
+                                                                    else if (leave.Status == LeaveStatus.Rejected)
+                                                                    {
+                                                                        <span class="badge bg-danger">Rejected</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="badge bg-secondary">Cancelled</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <tr><td colspan="5" class="text-center text-muted">No leave history</td></tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                index++;
+            }
+        }
+        else
+        {
+            <div class="alert alert-info">No employee history data available.</div>
+        }
+    </div>
+</div>

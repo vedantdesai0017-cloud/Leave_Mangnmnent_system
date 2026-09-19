@@ -1,0 +1,93 @@
+@using OfficeLeaveManagement.Models
+@model List<LeaveBalance>
+
+<div class="mb-4">
+    <h2>My Leave Balance</h2>
+    <p class="text-muted">Current Year Overview (@DateTime.Now.Year)</p>
+</div>
+
+<div class="row g-4 mb-5">
+    @foreach (var balance in Model)
+    {
+        double percentage = balance.TotalLeaves > 0 ? (double)balance.UsedLeaves / balance.TotalLeaves * 100 : 0;
+        double remainingPercentage = 100 - percentage;
+        
+        string borderClass = "border-success";
+        string textClass = "text-success";
+        string bgClass = "bg-success";
+        
+        if (remainingPercentage < 25)
+        {
+            borderClass = "border-danger";
+            textClass = "text-danger";
+            bgClass = "bg-danger";
+        }
+        else if (remainingPercentage <= 50)
+        {
+            borderClass = "border-warning";
+            textClass = "text-warning";
+            bgClass = "bg-warning";
+        }
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-bottom-0 border-end-0 border-top-0 border-4 @borderClass">
+                <div class="card-body text-center p-4">
+                    <h5 class="card-title text-muted mb-3">@balance.LeaveTypeName</h5>
+                    <div class="display-4 fw-bold @textClass mb-1">@balance.RemainingLeaves</div>
+                    <div class="small text-muted mb-4">Remaining</div>
+                    
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar @bgClass" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Used: @balance.UsedLeaves</span>
+                        <span>Total: @balance.TotalLeaves</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+        <h5 class="mb-0">Detailed Balance Summary</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Leave Type</th>
+                        <th class="text-center">Total Allowed</th>
+                        <th class="text-center">Used</th>
+                        <th class="text-center">Remaining</th>
+                        <th class="text-center">Year</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-medium">@item.LeaveTypeName</td>
+                                <td class="text-center">@item.TotalLeaves</td>
+                                <td class="text-center">@item.UsedLeaves</td>
+                                <td class="text-center fw-bold">@item.RemainingLeaves</td>
+                                <td class="text-center text-muted">@item.Year</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No leave balances found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

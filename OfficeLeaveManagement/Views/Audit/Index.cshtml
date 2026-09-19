@@ -1,0 +1,110 @@
+@model List<OfficeLeaveManagement.Models.AuditLog>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Audit Logs</h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">User</label>
+                <input type="text" name="userId" value="@ViewBag.UserFilter" class="form-control" placeholder="User Name / ID" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Action</label>
+                <select name="action" class="form-select">
+                    <option value="">-- All Actions --</option>
+                    <!option value="LOGIN" @(ViewBag.ActionFilter == "LOGIN" ? "selected" : "")>LOGIN</!option>
+                    <!option value="LOGOUT" @(ViewBag.ActionFilter == "LOGOUT" ? "selected" : "")>LOGOUT</!option>
+                    <!option value="APPLY_LEAVE" @(ViewBag.ActionFilter == "APPLY_LEAVE" ? "selected" : "")>APPLY_LEAVE</!option>
+                    <!option value="APPROVE_LEAVE" @(ViewBag.ActionFilter == "APPROVE_LEAVE" ? "selected" : "")>APPROVE_LEAVE</!option>
+                    <!option value="REJECT_LEAVE" @(ViewBag.ActionFilter == "REJECT_LEAVE" ? "selected" : "")>REJECT_LEAVE</!option>
+                    <!option value="CANCEL_LEAVE" @(ViewBag.ActionFilter == "CANCEL_LEAVE" ? "selected" : "")>CANCEL_LEAVE</!option>
+                    <!option value="CREATE_EMPLOYEE" @(ViewBag.ActionFilter == "CREATE_EMPLOYEE" ? "selected" : "")>CREATE_EMPLOYEE</!option>
+                    <!option value="UPDATE_EMPLOYEE" @(ViewBag.ActionFilter == "UPDATE_EMPLOYEE" ? "selected" : "")>UPDATE_EMPLOYEE</!option>
+                    <!option value="CREATE_DEPARTMENT" @(ViewBag.ActionFilter == "CREATE_DEPARTMENT" ? "selected" : "")>CREATE_DEPARTMENT</!option>
+                    <!option value="UPDATE_DEPARTMENT" @(ViewBag.ActionFilter == "UPDATE_DEPARTMENT" ? "selected" : "")>UPDATE_DEPARTMENT</!option>
+                    <!option value="CREATE_LEAVE_TYPE" @(ViewBag.ActionFilter == "CREATE_LEAVE_TYPE" ? "selected" : "")>CREATE_LEAVE_TYPE</!option>
+                    <!option value="UPDATE_LEAVE_TYPE" @(ViewBag.ActionFilter == "UPDATE_LEAVE_TYPE" ? "selected" : "")>UPDATE_LEAVE_TYPE</!option>
+                    <!option value="UPDATE_BALANCE" @(ViewBag.ActionFilter == "UPDATE_BALANCE" ? "selected" : "")>UPDATE_BALANCE</!option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search description..." data-table-search="auditTable" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="auditTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var log in Model)
+                        {
+                            <tr>
+                                <td>@log.AuditLogId</td>
+                                <td>@log.UserId</td>
+                                <td>
+                                    @{
+                                        string badgeClass = "bg-secondary";
+                                        if (log.Action.Contains("LOGIN") || log.Action.Contains("LOGOUT")) badgeClass = "bg-info";
+                                        else if (log.Action.Contains("APPLY")) badgeClass = "bg-primary";
+                                        else if (log.Action.Contains("APPROVE") || log.Action.Contains("CREATE")) badgeClass = "bg-success";
+                                        else if (log.Action.Contains("REJECT")) badgeClass = "bg-danger";
+                                        else if (log.Action.Contains("CANCEL")) badgeClass = "bg-warning";
+                                        else if (log.Action.Contains("UPDATE")) badgeClass = "bg-info";
+                                    }
+                                    <span class="badge @badgeClass">@log.Action</span>
+                                </td>
+                                <td>@log.Description</td>
+                                <td>@log.Timestamp.ToString("dd MMM yyyy HH:mm:ss")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No audit logs found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelector('[data-table-search="auditTable"]').addEventListener('keyup', function (e) {
+            var searchTerm = e.target.value.toLowerCase();
+            var rows = document.querySelectorAll('#auditTable tbody tr');
+            
+            rows.forEach(function (row) {
+                var text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

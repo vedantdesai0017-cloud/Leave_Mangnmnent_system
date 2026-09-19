@@ -1,0 +1,91 @@
+@model List<OfficeLeaveManagement.Models.LeaveApplication>
+@using OfficeLeaveManagement.Models
+@{
+    ViewData["Title"] = "My Leaves";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Leave Applications</h2>
+    <a asp-action="Apply" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Apply Leave
+    </a>
+</div>
+
+<div class="mb-3">
+    <input type="text" class="form-control" data-table-search="leavesTable" placeholder="Search leave applications..." />
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-container table-responsive">
+            <table class="table table-hover mb-0" id="leavesTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Days</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Applied Date</th>
+                        <th>Reviewed Date</th>
+                        <th>Manager Comment</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model == null || !Model.Any())
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-4 text-muted">No leave applications found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var leave in Model)
+                        {
+                            <tr>
+                                <td>@leave.LeaveTypeId</td>
+                                <td>@leave.StartDate.ToString("dd MMM yyyy")</td>
+                                <td>@leave.EndDate.ToString("dd MMM yyyy")</td>
+                                <td>@leave.NumberOfDays</td>
+                                <td>
+                                    <span title="@leave.Reason">
+                                        @(string.IsNullOrEmpty(leave.Reason) ? "" : (leave.Reason.Length > 50 ? leave.Reason.Substring(0, 47) + "..." : leave.Reason))
+                                    </span>
+                                </td>
+                                <td>
+                                    @{
+                                        var badgeClass = leave.Status switch
+                                        {
+                                            LeaveStatus.Pending => "badge-pending bg-warning text-dark",
+                                            LeaveStatus.Approved => "badge-approved bg-success",
+                                            LeaveStatus.Rejected => "badge-rejected bg-danger",
+                                            LeaveStatus.Cancelled => "badge-cancelled bg-secondary",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@leave.Status</span>
+                                </td>
+                                <td>@leave.AppliedDate.ToString("dd MMM yyyy")</td>
+                                <td>@(leave.ReviewedDate?.ToString("dd MMM yyyy") ?? "-")</td>
+                                <td>@leave.ManagerComment</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a asp-action="Details" asp-route-id="@leave.LeaveApplicationId" class="btn btn-sm btn-outline-info">View</a>
+                                        @if (leave.Status == LeaveStatus.Pending)
+                                        {
+                                            <form asp-action="Cancel" asp-route-id="@leave.LeaveApplicationId" method="post" onsubmit="return confirm('Are you sure you want to cancel this leave application?');" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

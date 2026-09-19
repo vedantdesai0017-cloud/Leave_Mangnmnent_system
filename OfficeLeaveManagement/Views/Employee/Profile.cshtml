@@ -1,0 +1,75 @@
+@using OfficeLeaveManagement.ViewModels
+@model ProfileViewModel
+
+<div class="mb-4">
+    <h2>My Profile</h2>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-md-5 border-end-md pe-md-4 mb-4 mb-md-0">
+                <h5 class="mb-4 text-primary"><i class="bi bi-person-badge me-2"></i>Employee Information</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted small mb-0">Employee Code</label>
+                    <div class="fw-bold fs-5">@Model.EmployeeCode</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted small mb-0">Email</label>
+                    <div>@Model.Email</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted small mb-0">Department</label>
+                    <div>@Model.DepartmentName</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted small mb-0">Role</label>
+                    <div><span class="badge bg-secondary">@Model.Role</span></div>
+                </div>
+                
+                <div class="mb-0">
+                    <label class="form-label text-muted small mb-0">Joining Date</label>
+                    <div>@Model.JoiningDate.ToString("dd MMM yyyy")</div>
+                </div>
+            </div>
+            
+            <div class="col-md-7 ps-md-4">
+                <h5 class="mb-4 text-primary"><i class="bi bi-pencil-square me-2"></i>Edit Profile Details</h5>
+                
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="Profile" method="post">
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="Phone" class="form-label">Phone Number</label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="btn btn-primary px-4">Update Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

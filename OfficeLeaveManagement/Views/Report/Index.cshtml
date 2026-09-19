@@ -1,0 +1,107 @@
+@model OfficeLeaveManagement.ViewModels.ReportViewModel
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Leave Reports & Analytics</h2>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-4 mb-4 mb-lg-0">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Monthly Leave Report</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyReportChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4 mb-lg-0">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Department Statistics</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="deptReportChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Leave Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusReportChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Employee Leave Statistics</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Total Applied</th>
+                        <th>Approved</th>
+                        <th>Rejected</th>
+                        <th>Pending</th>
+                        <th>Cancelled</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.EmployeeLeaveStats != null && Model.EmployeeLeaveStats.Any())
+                    {
+                        foreach (var stat in Model.EmployeeLeaveStats)
+                        {
+                            <tr>
+                                <td>@stat.EmployeeName</td>
+                                <td>@stat.DepartmentName</td>
+                                <td>@stat.TotalApplied</td>
+                                <td><span class="badge bg-success">@stat.Approved</span></td>
+                                <td><span class="badge bg-danger">@stat.Rejected</span></td>
+                                <td><span class="badge bg-warning">@stat.Pending</span></td>
+                                <td><span class="badge bg-secondary">@stat.Cancelled</span></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No data available.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            renderBarChart('monthlyReportChart',
+                @Html.Raw(Json.Serialize(Model.MonthlyLabels)),
+                @Html.Raw(Json.Serialize(Model.MonthlyLeaveCounts)),
+                'Leave Applications', '#4361ee');
+                
+            renderDoughnutChart('deptReportChart',
+                @Html.Raw(Json.Serialize(Model.DepartmentLabels)),
+                @Html.Raw(Json.Serialize(Model.DepartmentLeaveCounts)));
+                
+            renderPieChart('statusReportChart',
+                @Html.Raw(Json.Serialize(Model.StatusLabels)),
+                @Html.Raw(Json.Serialize(Model.StatusCounts)),
+                ['#f8961e', '#2ec4b6', '#e63946', '#6c757d']);
+        });
+    </script>
+}

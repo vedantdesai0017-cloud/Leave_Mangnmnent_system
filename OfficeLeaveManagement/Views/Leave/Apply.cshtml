@@ -1,0 +1,57 @@
+@model OfficeLeaveManagement.ViewModels.ApplyLeaveViewModel
+@{
+    ViewData["Title"] = "Apply Leave";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Apply for Leave</h2>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Apply" method="post">
+            <div class="mb-3">
+                <label asp-for="LeaveTypeId" class="form-label">Leave Type</label>
+                <select asp-for="LeaveTypeId" class="form-select" asp-items="@(new SelectList(Model.AvailableLeaveTypes, "LeaveTypeId", "LeaveName"))">
+                    <option value="">-- Select Leave Type --</option>
+                </select>
+                <span asp-validation-for="LeaveTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="StartDate" class="form-label">Start Date</label>
+                    <input asp-for="StartDate" type="date" class="form-control" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="EndDate" class="form-label">End Date</label>
+                    <input asp-for="EndDate" type="date" class="form-control" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NumberOfDays" class="form-label">Number of Days</label>
+                <input asp-for="NumberOfDays" type="text" id="NumberOfDays" class="form-control" readonly />
+                <div id="dayCalculation" class="form-text text-muted mt-1"></div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Reason" class="form-label">Reason</label>
+                <textarea asp-for="Reason" class="form-control" rows="4" placeholder="Enter reason for leave..."></textarea>
+                <span asp-validation-for="Reason" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+                <a asp-action="MyLeaves" asp-controller="Leave" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/leave.js"></script>
+}

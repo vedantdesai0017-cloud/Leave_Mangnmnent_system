@@ -1,0 +1,112 @@
+@using OfficeLeaveManagement.Models
+@model List<Employee>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Employee Management</h2>
+    <a asp-action="CreateEmployee" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Add Employee</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" name="search" id="search" class="form-control" placeholder="Name, Email, or Code" value="@ViewBag.SearchTerm">
+            </div>
+            <div class="col-md-3">
+                <label for="departmentId" class="form-label">Department</label>
+                <select name="departmentId" id="departmentId" class="form-select">
+                    <option value="">All Departments</option>
+                    @if(ViewBag.Departments != null)
+                    {
+                        foreach(var dept in (List<Department>)ViewBag.Departments)
+                        {
+                            if(ViewBag.DepartmentFilter != null && (int)ViewBag.DepartmentFilter == dept.DepartmentId)
+                            {
+                                <option value="@dept.DepartmentId" selected>@dept.DepartmentName</option>
+                            }
+                            else
+                            {
+                                <option value="@dept.DepartmentId">@dept.DepartmentName</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="role" class="form-label">Role</label>
+                <select name="role" id="role" class="form-select">
+                    <option value="">All Roles</option>
+                    @foreach (var role in Enum.GetValues(typeof(UserRole)))
+                    {
+                        if(ViewBag.RoleFilter != null && ViewBag.RoleFilter.ToString() == role.ToString())
+                        {
+                            <option value="@role" selected>@role</option>
+                        }
+                        else
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter me-1"></i>Filter</button>
+            </div>
+        </form>
+
+        <div class="table-responsive table-container">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Role</th>
+                        <th>Joining Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(Model.Any())
+                    {
+                        foreach(var emp in Model)
+                        {
+                            <tr>
+                                <td>@emp.EmployeeCode</td>
+                                <td>@emp.FullName</td>
+                                <td>@emp.Email</td>
+                                <td>@emp.DepartmentName</td>
+                                <td>@emp.Role</td>
+                                <td>@emp.JoiningDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @if(emp.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditEmployee" asp-route-id="@emp.EmployeeId" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-3">No employees found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
